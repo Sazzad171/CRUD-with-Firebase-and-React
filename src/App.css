@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700&display=swap');
+
+*::selection {
+  color: #fff;
+  background-color: #dc3545;
+  text-shadow: none;
+}
+body {
+  background-color: #000;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+.form-control {
+  background-color: #000;
+}
+.form-control:focus {
+  background-color: #000;
+  color: #fff;
+  box-shadow: none;
+  border-color: #dc3545;
+}
+#root {
+  width: 100%;
+}
+h1, h2, h3, h4, h5, h6, p, label {
+  color: #fff;
+}
+.new-entry-area {
+  background-color: #0B0A0C;
+}
+.result-show-area {
+  background-color: #141214;
+}
+.new-entry-area, 
+.result-show-area {
+  box-shadow: 2px 2px 14px -6px #dc3545;
+  transition: 0.3s;
+}
+.new-entry-area:hover, 
+.result-show-area:hover {
+  box-shadow: none;
+}

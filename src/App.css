@@ -56,3 +56,8 @@ h1, h2, h3, h4, h5, h6, p, label {
   align-items: center;
   justify-content: center;
 }
+@media (max-width: 767px) {
+  .ReactModal__Content--after-open {
+    inset: 5% !important;
+  }
+}

@@ -161,7 +161,7 @@ export default class FullBody extends Component {
     return (
       <section className="my-3">
           <div className="container">
-            <h2 className="mb-5">Result Management System</h2>
+            <h2 className="mb-5">E-Result System</h2>
             <div className="row">
               {/* left column */}
               <div className="col-md-6 mb-3 mb-md-0">

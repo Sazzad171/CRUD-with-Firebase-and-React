@@ -3,6 +3,9 @@ import instance from '../firebase/instance'
 import React, { Component } from 'react'
 import EntryNew from './EntryNew';
 import ResultArea from './ResultArea';
+import UpdateModal from './UpdateModal';
+import { trackPromise } from 'react-promise-tracker';
+import { toast } from 'react-toastify';
 
 export default class FullBody extends Component {
 
@@ -13,7 +16,8 @@ export default class FullBody extends Component {
       name: "",
       subject: "",
       grade: "",
-      results: []
+      results: [],
+      modalStatus: false
     }
   }
 
@@ -36,42 +40,51 @@ export default class FullBody extends Component {
     }
 
     // add item to array & firebase database
-    instance.post("/results.json", data).then((res) => {
-      console.log(res);
+    trackPromise (
+      instance.post("/results.json", data).then((res) => {
 
-      const results = [...this.state.results, {...data, id: res.data.name}];
+        const results = [...this.state.results, {...data, id: res.data.name}];
 
-      this.setState({
-        name: "",
-        subject: "",
-        grade: "",
-        results: results
+        this.setState({
+          name: "",
+          subject: "",
+          grade: "",
+          results: results
+        });
+
+        // show toast
+        toast.success("Result added successfully!");
       })
-    })
+    );
   }
 
   // get request
   componentDidMount() {
-    instance.get("/results.json").then( (res) => {
-      var fetchedData = [];
+    trackPromise (
+      instance.get("/results.json").then( (res) => {
+        var fetchedData = [];
 
-      // push fetched data to array
-      for (let key in res.data) {
-        fetchedData.push({ ...res.data[key], id: key });
-      }
+        // push fetched data to array
+        for (let key in res.data) {
+          fetchedData.push({ ...res.data[key], id: key });
+        }
 
-      // set demo array to state array
-      this.setState({
-        results: fetchedData
+        // set demo array to state array
+        this.setState({
+          results: fetchedData
+        });
       })
-    })
+    )
   }
 
   // remove item
   removeItem = (id) => {
-    instance.delete(`/results/${id}.json`).then( (res) => {
-
-    })
+    trackPromise (
+      instance.delete(`/results/${id}.json`).then( (res) => {
+        // show toast
+        toast.error("Result delete successfully!");
+      })
+    );
 
     // update state
     this.setState({
@@ -79,8 +92,71 @@ export default class FullBody extends Component {
     })
   }
 
+  // close modal
+  closeModal = () => {
+    this.setState({
+      modalStatus: !this.state.modalStatus,
+      name: "",
+      subject: "",
+      grade: ""
+    })
+  }
+
+  // modal open and show
+  handleUpdate = (id) => {
+    const result = this.state.results.find(result => result.id === id);
+
+    this.setState({
+      modalStatus: !this.state.modalStatus,
+      name: result.name,
+      subject: result.subject,
+      grade: result.grade,
+      id: result.id
+    })
+  }
+
+  // update data
+  updateResult = (e) => {
+    e.preventDefault();
+
+    this.setState({
+      modalStatus: !this.state.modalStatus
+    })
+
+    const data = {
+      name: this.state.name,
+      subject: this.state.subject,
+      grade: this.state.grade
+    };
+
+    trackPromise (
+      instance.put(`/results/${this.state.id}.json`, data).then( (res) => {
+        // get updated data
+        instance.get("/results.json").then( (res) => {
+          var fetchedData = [];
+    
+          // push fetched data to array
+          for (let key in res.data) {
+            fetchedData.push({ ...res.data[key], id: key });
+          }
+    
+          // set demo array to state array
+          this.setState({
+            results: fetchedData,
+            name: "",
+            subject: "",
+            grade: ""
+          })
+        });
+
+        // show toast
+        toast.info("Result updated successfully!");
+      })
+    );
+  }
+
   render() {
-    const { name, subject, grade, results } = this.state
+    const { name, subject, grade, results, modalStatus } = this.state
 
     return (
       <section className="my-3">
@@ -98,11 +174,14 @@ export default class FullBody extends Component {
               {/* right column */}
               <div className="col-md-6">
                 <div className="result-show-area px-3 py-4 rounded h-100">
-                  <ResultArea results={ results } removeItem={ this.removeItem } />
+                  <ResultArea results={ results } removeItem={ this.removeItem } handleUpdate={ this.handleUpdate } />
                 </div>
               </div>
             </div>
           </div>
+          {/* modal component */}
+          <UpdateModal modalStatus={ modalStatus } closeModal={ this.closeModal } name={ name } subject={ subject } grade={ grade }
+            onHandleChange={ this.onHandleChange } updateResult={ this.updateResult } />
       </section>
     )
   }
